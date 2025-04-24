@@ -18,4 +18,6 @@ A simple and intuitive COCOMO (Constructive Cost Model) calculator built using *
 ```bash
 npm install
 npm run dev
+```
+Made with ❤️ by Rahul
 

@@ -37,7 +37,6 @@ export function BasicMode({ onCalculate }: BasicModeProps) {
       return
     }
 
-    // Coefficients based on project type
     let a, b, c, d
 
     switch (projectType) {
