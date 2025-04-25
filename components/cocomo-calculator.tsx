@@ -44,6 +44,12 @@ export function CococoCalculator() {
   const [intermediateResults, setIntermediateResults] = useState<Results | null>(null)
   const [kloc, setKloc] = useState<number>(0)
   const [projectType, setProjectType] = useState<ProjectType>("organic")
+  const [coefficients, setCoefficients] = useState<{ a: number; b: number; c: number; d: number }>({
+    a: 2.4,
+    b: 1.05,
+    c: 2.5,
+    d: 0.38,
+  })
 
   const handleBasicCalculation = (results: Results, klocValue: number, type: ProjectType) => {
     setBasicResults(results)
@@ -55,6 +61,10 @@ export function CococoCalculator() {
     setIntermediateResults(results)
     setKloc(klocValue)
     setProjectType(type)
+  }
+
+  const handleCoefficientsChange = (newCoefficients: { a: number; b: number; c: number; d: number }) => {
+    setCoefficients(newCoefficients)
   }
 
   return (
@@ -71,14 +81,17 @@ export function CococoCalculator() {
         <TabsContent value="basic">
           <Card>
             <CardContent className="pt-6">
-              <BasicMode onCalculate={handleBasicCalculation} />
+              <BasicMode onCalculate={handleBasicCalculation} onCoefficientsChange={handleCoefficientsChange} />
             </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="intermediate">
           <Card>
             <CardContent className="pt-6">
-              <IntermediateMode onCalculate={handleIntermediateCalculation} />
+              <IntermediateMode
+                onCalculate={handleIntermediateCalculation}
+                onCoefficientsChange={handleCoefficientsChange}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -104,6 +117,7 @@ export function CococoCalculator() {
                 intermediateResults={intermediateResults}
                 kloc={kloc}
                 projectType={projectType}
+                coefficients={coefficients}
               />
             </CardContent>
           </Card>

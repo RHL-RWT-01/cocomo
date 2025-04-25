@@ -4,14 +4,16 @@ import type { ProjectType, Results } from "./cocomo-calculator"
 import { Line, LineChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
+// Update the EffortChartProps interface to include coefficients
 interface EffortChartProps {
   basicResults: Results | null
   intermediateResults: Results | null
   kloc: number
   projectType: ProjectType
+  coefficients: { a: number; b: number; c: number; d: number }
 }
 
-export function EffortChart({ basicResults, intermediateResults, kloc, projectType }: EffortChartProps) {
+export function EffortChart({ basicResults, intermediateResults, kloc, projectType, coefficients }: EffortChartProps) {
   if (!basicResults && !intermediateResults) {
     return <p>No data to display. Please calculate first.</p>
   }
@@ -22,34 +24,8 @@ export function EffortChart({ basicResults, intermediateResults, kloc, projectTy
     const maxKloc = kloc * 2
     const step = maxKloc / 10
 
-    // Coefficients based on project type
-    let a, b, c, d
-
-    switch (projectType) {
-      case "organic":
-        a = 2.4
-        b = 1.05
-        c = 2.5
-        d = 0.38
-        break
-      case "semi-detached":
-        a = 3.0
-        b = 1.12
-        c = 2.5
-        d = 0.35
-        break
-      case "embedded":
-        a = 3.6
-        b = 1.2
-        c = 2.5
-        d = 0.32
-        break
-      default:
-        a = 2.4
-        b = 1.05
-        c = 2.5
-        d = 0.38
-    }
+    // Use user-defined coefficients
+    const { a, b, c, d } = coefficients
 
     // Calculate EAF for intermediate mode
     const eaf = intermediateResults?.eaf || 1

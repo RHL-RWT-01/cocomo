@@ -9,7 +9,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "COCOMO Calculator",
   description: "Estimate software development effort using the Constructive Cost Model",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({

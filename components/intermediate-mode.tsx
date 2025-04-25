@@ -12,8 +12,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
+// Update the IntermediateModeProps interface to include onCoefficientsChange
 interface IntermediateModeProps {
   onCalculate: (results: Results, kloc: number, projectType: ProjectType) => void
+  onCoefficientsChange: (coefficients: { a: number; b: number; c: number; d: number }) => void
 }
 
 // Cost driver multipliers
@@ -61,7 +63,8 @@ const costDriverGroups = {
   "Project Attributes": ["MODP", "TOOL", "SCED"],
 }
 
-export function IntermediateMode({ onCalculate }: IntermediateModeProps) {
+// Update the component to include coefficient inputs
+export function IntermediateMode({ onCalculate, onCoefficientsChange }: IntermediateModeProps) {
   const [kloc, setKloc] = useState<string>("")
   const [projectType, setProjectType] = useState<ProjectType>("organic")
   const [costDrivers, setCostDrivers] = useState<CostDrivers>({
@@ -82,6 +85,12 @@ export function IntermediateMode({ onCalculate }: IntermediateModeProps) {
     SCED: "nominal",
   })
   const [error, setError] = useState<string | null>(null)
+  const [coefficients, setCoefficients] = useState<{ a: number; b: number; c: number; d: number }>({
+    a: 2.4,
+    b: 1.05,
+    c: 2.5,
+    d: 0.38,
+  })
 
   const handleKlocChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setKloc(e.target.value)
@@ -90,6 +99,38 @@ export function IntermediateMode({ onCalculate }: IntermediateModeProps) {
 
   const handleProjectTypeChange = (value: string) => {
     setProjectType(value as ProjectType)
+
+    // Set default coefficients based on project type
+    let a, b, c, d
+    switch (value) {
+      case "organic":
+        a = 2.4
+        b = 1.05
+        c = 2.5
+        d = 0.38
+        break
+      case "semi-detached":
+        a = 3.0
+        b = 1.12
+        c = 2.5
+        d = 0.35
+        break
+      case "embedded":
+        a = 3.6
+        b = 1.2
+        c = 2.5
+        d = 0.32
+        break
+      default:
+        a = 2.4
+        b = 1.05
+        c = 2.5
+        d = 0.38
+    }
+
+    const newCoefficients = { a, b, c, d }
+    setCoefficients(newCoefficients)
+    onCoefficientsChange(newCoefficients)
   }
 
   const handleCostDriverChange = (driver: keyof CostDrivers, value: string) => {
@@ -97,6 +138,15 @@ export function IntermediateMode({ onCalculate }: IntermediateModeProps) {
       ...prev,
       [driver]: value as CostDriverRating,
     }))
+  }
+
+  const handleCoefficientChange = (coefficient: keyof typeof coefficients, value: string) => {
+    const numValue = Number.parseFloat(value)
+    if (!isNaN(numValue)) {
+      const newCoefficients = { ...coefficients, [coefficient]: numValue }
+      setCoefficients(newCoefficients)
+      onCoefficientsChange(newCoefficients)
+    }
   }
 
   const calculateEAF = () => {
@@ -124,34 +174,8 @@ export function IntermediateMode({ onCalculate }: IntermediateModeProps) {
       return
     }
 
-    // Coefficients based on project type
-    let a, b, c, d
-
-    switch (projectType) {
-      case "organic":
-        a = 2.4
-        b = 1.05
-        c = 2.5
-        d = 0.38
-        break
-      case "semi-detached":
-        a = 3.0
-        b = 1.12
-        c = 2.5
-        d = 0.35
-        break
-      case "embedded":
-        a = 3.6
-        b = 1.2
-        c = 2.5
-        d = 0.32
-        break
-      default:
-        a = 2.4
-        b = 1.05
-        c = 2.5
-        d = 0.38
-    }
+    // Use user-defined coefficients
+    const { a, b, c, d } = coefficients
 
     // Calculate EAF
     const eaf = calculateEAF()
@@ -251,6 +275,60 @@ export function IntermediateMode({ onCalculate }: IntermediateModeProps) {
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        <div className="space-y-4 pt-4 border-t">
+          <h3 className="text-md font-medium">COCOMO Coefficients</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="coefficient-a-int">Coefficient a</Label>
+              <Input
+                id="coefficient-a-int"
+                type="number"
+                min="0.1"
+                step="0.1"
+                value={coefficients.a}
+                onChange={(e) => handleCoefficientChange("a", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="coefficient-b-int">Coefficient b</Label>
+              <Input
+                id="coefficient-b-int"
+                type="number"
+                min="0.1"
+                step="0.01"
+                value={coefficients.b}
+                onChange={(e) => handleCoefficientChange("b", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="coefficient-c-int">Coefficient c</Label>
+              <Input
+                id="coefficient-c-int"
+                type="number"
+                min="0.1"
+                step="0.1"
+                value={coefficients.c}
+                onChange={(e) => handleCoefficientChange("c", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="coefficient-d-int">Coefficient d</Label>
+              <Input
+                id="coefficient-d-int"
+                type="number"
+                min="0.1"
+                step="0.01"
+                value={coefficients.d}
+                onChange={(e) => handleCoefficientChange("d", e.target.value)}
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Default values are set based on project type. You can customize these coefficients for your specific project
+            needs.
+          </p>
         </div>
 
         <Accordion type="multiple" defaultValue={["Product Attributes"]}>

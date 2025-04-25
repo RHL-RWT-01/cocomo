@@ -11,14 +11,23 @@ import type { ProjectType, Results } from "./cocomo-calculator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 
+// Update the BasicModeProps interface to include onCoefficientsChange
 interface BasicModeProps {
   onCalculate: (results: Results, kloc: number, projectType: ProjectType) => void
+  onCoefficientsChange: (coefficients: { a: number; b: number; c: number; d: number }) => void
 }
 
-export function BasicMode({ onCalculate }: BasicModeProps) {
+// Update the component to include coefficient inputs
+export function BasicMode({ onCalculate, onCoefficientsChange }: BasicModeProps) {
   const [kloc, setKloc] = useState<string>("")
   const [projectType, setProjectType] = useState<ProjectType>("organic")
   const [error, setError] = useState<string | null>(null)
+  const [coefficients, setCoefficients] = useState<{ a: number; b: number; c: number; d: number }>({
+    a: 2.4,
+    b: 1.05,
+    c: 2.5,
+    d: 0.38,
+  })
 
   const handleKlocChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setKloc(e.target.value)
@@ -27,19 +36,10 @@ export function BasicMode({ onCalculate }: BasicModeProps) {
 
   const handleProjectTypeChange = (value: string) => {
     setProjectType(value as ProjectType)
-  }
 
-  const calculateBasicCocomo = () => {
-    const klocValue = Number.parseFloat(kloc)
-
-    if (isNaN(klocValue) || klocValue <= 0) {
-      setError("Please enter a valid positive number for KLOC")
-      return
-    }
-
+    // Set default coefficients based on project type
     let a, b, c, d
-
-    switch (projectType) {
+    switch (value) {
       case "organic":
         a = 2.4
         b = 1.05
@@ -64,6 +64,31 @@ export function BasicMode({ onCalculate }: BasicModeProps) {
         c = 2.5
         d = 0.38
     }
+
+    const newCoefficients = { a, b, c, d }
+    setCoefficients(newCoefficients)
+    onCoefficientsChange(newCoefficients)
+  }
+
+  const handleCoefficientChange = (coefficient: keyof typeof coefficients, value: string) => {
+    const numValue = Number.parseFloat(value)
+    if (!isNaN(numValue)) {
+      const newCoefficients = { ...coefficients, [coefficient]: numValue }
+      setCoefficients(newCoefficients)
+      onCoefficientsChange(newCoefficients)
+    }
+  }
+
+  const calculateBasicCocomo = () => {
+    const klocValue = Number.parseFloat(kloc)
+
+    if (isNaN(klocValue) || klocValue <= 0) {
+      setError("Please enter a valid positive number for KLOC")
+      return
+    }
+
+    // Use user-defined coefficients
+    const { a, b, c, d } = coefficients
 
     // Calculate effort, time, staff, and productivity
     const effort = a * Math.pow(klocValue, b)
@@ -109,6 +134,60 @@ export function BasicMode({ onCalculate }: BasicModeProps) {
               <SelectItem value="embedded">Embedded</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="space-y-4 pt-4 border-t">
+          <h3 className="text-md font-medium">COCOMO Coefficients</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="coefficient-a">Coefficient a</Label>
+              <Input
+                id="coefficient-a"
+                type="number"
+                min="0.1"
+                step="0.1"
+                value={coefficients.a}
+                onChange={(e) => handleCoefficientChange("a", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="coefficient-b">Coefficient b</Label>
+              <Input
+                id="coefficient-b"
+                type="number"
+                min="0.1"
+                step="0.01"
+                value={coefficients.b}
+                onChange={(e) => handleCoefficientChange("b", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="coefficient-c">Coefficient c</Label>
+              <Input
+                id="coefficient-c"
+                type="number"
+                min="0.1"
+                step="0.1"
+                value={coefficients.c}
+                onChange={(e) => handleCoefficientChange("c", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="coefficient-d">Coefficient d</Label>
+              <Input
+                id="coefficient-d"
+                type="number"
+                min="0.1"
+                step="0.01"
+                value={coefficients.d}
+                onChange={(e) => handleCoefficientChange("d", e.target.value)}
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Default values are set based on project type. You can customize these coefficients for your specific project
+            needs.
+          </p>
         </div>
 
         {error && (
