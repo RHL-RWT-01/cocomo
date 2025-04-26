@@ -60,8 +60,7 @@ export function EstimationApp() {
           </SidebarContent>
           <SidebarFooter className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">v1.0.0</span>
-              <ThemeToggle />
+              
             </div>
           </SidebarFooter>
         </Sidebar>
