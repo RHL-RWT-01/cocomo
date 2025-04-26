@@ -2,16 +2,17 @@
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    "target": "ES6",
+    "target": "ESNext", // Updated from ES6 to ESNext
     "skipLibCheck": true,
     "strict": true,
+    "strictNullChecks": true, // Explicitly added for null safety
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node", // Changed from bundler to node
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx", // Updated for React 17+ JSX runtime
     "incremental": true,
     "plugins": [
       {
